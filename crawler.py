@@ -25,14 +25,17 @@ class Crawler:
     def get_names(self, url, html):
         names = []
         images = []
+        urls = []
         soup = BeautifulSoup(html, 'html.parser')
         for h3 in soup.find_all("h3", {"class": "voffset0"}):
             for a in h3.find_all('a'):
                 names.append(a.string)
+                companie_url = 'https://pt.teamlyzer.com%s'% (a['href'])
+                urls.append(companie_url)
         for img in soup.find_all("img", {"class": "img-responsive img-thumbnail"}):
             img_url = 'https://pt.teamlyzer.com%s'% (img['src'])
             images.append(img_url)
-        return [names, images]
+        return [names, images, urls]
 
     def add_url_to_visit(self, url):
         if url not in self.visited_urls and url not in self.urls_to_visit:
@@ -56,6 +59,11 @@ class Crawler:
             file_path = os.path.join(script_dir, 'images.txt')
             with open(file_path, "a") as text_file:
                 text_file.write("%s \n" % (image))
+        
+        for url in self.get_names(url, html)[2]:
+            file_path = os.path.join(script_dir, 'urls.txt')
+            with open(file_path, "a") as text_file:
+                text_file.write("%s \n" % (url))
     
         self.page = self.page + 1
         url="{}{}".format('https://pt.teamlyzer.com/companies/?page=', self.page)
